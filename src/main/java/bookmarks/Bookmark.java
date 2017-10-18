@@ -33,6 +33,10 @@ public class Bookmark {
         return this.account;
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     public String getUri() {
         return this.uri;
     }
