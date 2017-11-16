@@ -76,8 +76,8 @@ public class BookmarkRestControllerTest {
         this.accountRepository.deleteAllInBatch();
 
         this.account = accountRepository.save(new Account(userName, "password"));
-        this.bookmarkList.add(bookmarkRepository.save(new Bookmark(account, "http://boommark.com/1/" + userName, "A description")));
-        this.bookmarkList.add(bookmarkRepository.save(new Bookmark(account, "http://boommark.com/2/" + userName, "A description")));
+        this.bookmarkList.add(bookmarkRepository.save(new Bookmark(account, "http://bookmark.com/1/" + userName, "A description")));
+        this.bookmarkList.add(bookmarkRepository.save(new Bookmark(account, "http://bookmark.com/2/" + userName, "A description")));
 
     }
 

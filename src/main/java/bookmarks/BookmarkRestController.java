@@ -1,6 +1,7 @@
 package bookmarks;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,7 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/{userId}/bookmarks") // class level URI mapping with path variable, set by method input parameters annotated with @PathVariable
@@ -27,10 +29,14 @@ class BookmarkRestController {
 
     // uses default URI mapping defined at class level
     @RequestMapping(method = RequestMethod.GET)
-    Collection<Bookmark> readBookmarks(@PathVariable String userId) {
+    Resources<BookmarkResource> readBookmarks(@PathVariable String userId) {
         this.validateUser(userId);
 
-        return this.bookmarkRepository.findByAccountUsername(userId);
+        List<BookmarkResource> bookmarkResourceList = bookmarkRepository.findByAccountUsername(userId).stream()
+                                                                        .map(BookmarkResource::new)
+                                                                        .collect(Collectors.toList());
+
+        return new Resources<>(bookmarkResourceList);
     }
 
     // uses default URI mapping defined at class level
@@ -54,10 +60,10 @@ class BookmarkRestController {
     // appends "/{bookmarkId}" path variable to URI  mapping, to "/{userId}/bookmarks" defined at the class level
     // {bookmarkId} path variable set by method parameter annotated with @PathVariable
     @RequestMapping(method = RequestMethod.GET, value = "/{bookmarkId}")
-    Bookmark readBookmark(@PathVariable String userId, @PathVariable Long bookmarkId) {
+    BookmarkResource readBookmark(@PathVariable String userId, @PathVariable Long bookmarkId) {
         this.validateUser(userId);
 
-        return this.bookmarkRepository.findOne(bookmarkId);
+        return new BookmarkResource(this.bookmarkRepository.findOne(bookmarkId));
     }
 
     private void validateUser(String userId) {
