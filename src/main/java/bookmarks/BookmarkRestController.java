@@ -1,6 +1,7 @@
 package bookmarks;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.Resources;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
@@ -42,16 +42,17 @@ class BookmarkRestController {
     // uses default URI mapping defined at class level
     @RequestMapping(method = RequestMethod.POST)
     ResponseEntity<?> add(@PathVariable String userId, @RequestBody Bookmark input) {
+
         this.validateUser(userId);
 
         return this.accountRepository
                 .findByUsername(userId)
                 .map(account -> {
-                    Bookmark result = bookmarkRepository.save(new Bookmark(account, input.uri, input.description));
+                    Bookmark bookmark = bookmarkRepository.save(new Bookmark(account, input.uri, input.description));
 
-                    URI location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(result.getId()).toUri();
+                    Link forOneBookmark = new BookmarkResource(bookmark).getLink("self");
 
-                    return ResponseEntity.created(location).build();
+                    return ResponseEntity.created(URI.create(forOneBookmark.getHref())).build();
 
                 }).orElse(ResponseEntity.noContent().build());
 

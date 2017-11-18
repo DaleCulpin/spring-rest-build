@@ -21,5 +21,5 @@ public class BookmarkResource extends ResourceSupport {
     public Bookmark getBookmark() {
         return bookmark;
     }
-§
+
 }
