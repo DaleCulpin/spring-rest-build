@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,10 +30,10 @@ public class BookmarkRestController {
 
     // uses default URI mapping defined at class level
     @RequestMapping(method = RequestMethod.GET)
-    Resources<BookmarkResource> readBookmarks(@PathVariable String userId) {
-        this.validateUser(userId);
+    Resources<BookmarkResource> readBookmarks(Principal principal) {
+        this.validateUser(principal);
 
-        List<BookmarkResource> bookmarkResourceList = bookmarkRepository.findByAccountUsername(userId).stream()
+        List<BookmarkResource> bookmarkResourceList = bookmarkRepository.findByAccountUsername(principal.getName()).stream()
                                                                         .map(BookmarkResource::new)
                                                                         .collect(Collectors.toList());
 
@@ -41,12 +42,12 @@ public class BookmarkRestController {
 
     // uses default URI mapping defined at class level
     @RequestMapping(method = RequestMethod.POST)
-    ResponseEntity<?> add(@PathVariable String userId, @RequestBody Bookmark input) {
+    ResponseEntity<?> add(Principal principal, @RequestBody Bookmark input) {
 
-        this.validateUser(userId);
+        this.validateUser(principal);
 
         return this.accountRepository
-                .findByUsername(userId)
+                .findByUsername(principal.getName())
                 .map(account -> {
                     Bookmark bookmark = bookmarkRepository.save(new Bookmark(account, input.uri, input.description));
 
@@ -61,13 +62,14 @@ public class BookmarkRestController {
     // appends "/{bookmarkId}" path variable to URI  mapping, to "/{userId}/bookmarks" defined at the class level
     // {bookmarkId} path variable set by method parameter annotated with @PathVariable
     @RequestMapping(method = RequestMethod.GET, value = "/{bookmarkId}")
-    BookmarkResource readBookmark(@PathVariable String userId, @PathVariable Long bookmarkId) {
-        this.validateUser(userId);
+    BookmarkResource readBookmark(Principal principal, @PathVariable Long bookmarkId) {
+        this.validateUser(principal);
 
         return new BookmarkResource(this.bookmarkRepository.findOne(bookmarkId));
     }
 
-    private void validateUser(String userId) {
+    private void validateUser(Principal principal) {
+        String userId = principal.getName();
         this.accountRepository.findByUsername(userId).orElseThrow(
                 () -> new UserNotFoundException(userId));
     }
