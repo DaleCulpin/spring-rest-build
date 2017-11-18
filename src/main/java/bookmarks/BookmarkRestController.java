@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/{userId}/bookmarks") // class level URI mapping with path variable, set by method input parameters annotated with @PathVariable
-class BookmarkRestController {
+public class BookmarkRestController {
 
     private final BookmarkRepository bookmarkRepository;
     private final AccountRepository accountRepository;
